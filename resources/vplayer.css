@@ -1,0 +1,193 @@
+html, body {
+	margin:0;
+	padding:0;
+	width:100%;
+	height:100%;
+}
+body {
+	background-color: DimGrey;
+	font-family:"Lucida Grande","Lucida Sans Unicode","DejaVu Sans",Lucida,Arial,Helvetica,sans-serif;
+}
+header{
+	position: sticky;
+	width: 100%;
+	top: 0;
+	left: 0;
+	z-index: 100;
+}
+input[type="file"] {
+	display: none;
+}
+.fileInput{
+	border: 2px solid #ccc;
+	display: inline-block;
+	padding: 5px 6px 5px 5px;
+	color: #fff;
+	cursor: pointer;
+	margin: 5px;
+}
+#filename{
+	padding: 5px;
+	color: white;
+}
+figure {
+	max-width: 640px;
+	width: 100%;
+	height: auto;
+	margin: 0 auto;
+	padding: 5px 0 0 0;
+	background-color:#666;
+}
+figcaption {
+	padding: 5px;
+	display:block;
+	font-size:12px;
+	color:#fff;
+}
+video {
+	width:100%;
+}
+
+/* controls */
+.controls > * {
+	float:left;
+//	width:3.90625%;
+	height:100%;
+	height: 30px;
+	margin-left:0.1953125%;
+	display:block;
+}
+.controls {
+	cursor:pointer;
+	width:99%;
+}
+.progress {
+	width: 100%;
+}
+.controls progress {
+	display:block;
+	width:100%;
+	height:81%;
+	margin-top:2px;
+	margin-top:0.125rem;
+	border:none;
+	overflow:hidden;
+	-moz-border-radius:2px;
+	-webkit-border-radius:2px;
+	border-radius:2px;
+	color:#0095dd;
+}
+/* Chrome requires its own rule for this, otherwise it ignores it */
+.controls progress::-webkit-progress-value {
+	background-color:#0095dd;
+}
+
+.buttons{
+  margin: 1px;
+  width: 10%;
+  display: inline-block;
+  padding: 5px;
+  text-decoration: none;
+//  border-bottom: solid 4px #627295;
+  border-radius: 3px;
+  -webkit-appearance: none;
+}
+.buttons:active  {
+  -webkit-transform: translateY(2px);
+  transform: translateY(2px);
+  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.2);
+  border-bottom: none;
+}
+.buttons:hover{
+    filter:brightness(1.2);
+    cursor: pointer;
+}
+.buttons:disabled  {
+  -webkit-transform: translateY(1px);
+  transform: translateY(1px);
+  color: dimGrey;
+  box-shadow: 1px 0px 0px rgba(0, 0, 0, 0.2);
+  border-bottom: none;
+  filter:brightness(1.0);
+  cursor: not-allowed;
+}
+
+.noMovingButton{
+  margin: 1px;
+  width: 10%;
+  display: inline-block;
+  padding: 5px;
+  text-decoration: none;
+//  border-bottom: solid 4px #627295;
+  border-radius: 3px;
+  -webkit-appearance: none;
+}
+.noMovingButton:hover{
+    filter:brightness(1.2);
+    cursor: pointer;
+}
+.noMovingButton:disabled  {
+  color: dimGrey;
+  box-shadow: 1px 0px 0px rgba(0, 0, 0, 0.2);
+  border-bottom: none;
+  filter:brightness(1.0);
+  cursor: not-allowed;
+}
+#pressPlay{
+  background: #668ad8;
+  color: #fff;
+  width: 40%;
+  height: 4em;
+}
+#pressPlay:active{
+  background: red;
+}
+#pressPlay:disabled{
+  background: #668ad8;
+}
+
+#playPause{
+  background: #339270;
+  color: #fff;
+  width: 40%;
+  height: 4em;
+}
+
+#quickRewind{
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+}
+
+.rew{
+	width: 15%;
+}
+
+#mandl{
+	background: #B40F0F;
+	color: #fff;
+	width: 30%;
+}
+#monly{
+	background: #B54E6E;
+	color: #fff;
+	width: 30%;
+}
+
+#saveFile{
+	background: #000000;
+	color: #fff;
+	width: auto
+}
+
+#scriptDiv{
+	margin: 0 5px 0 5px;
+	width: auto;
+}
+#textArea{
+	width: 100%;
+	resize: none;
+	font-family: Times New Roman;
+	font-size: 12pt;
+	background-color: floralwhite;
+}
