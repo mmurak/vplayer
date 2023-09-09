@@ -1,0 +1,85 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Subtitles Extractor</title>
+	<script src="./resources/mp4box.all.min.js"></script>
+</head>
+<body>
+
+<h2>MP4 (tx3g) subtitles to SRT converter.  (Powered by MP4Box.js)</h2>
+<input type="file">
+
+<div id="buttonArea"></div>
+<textarea id="scriptsArea" cols="80" rows="30"></textarea>
+
+<script src="./resources/ISO639.js"></script>
+<script src="./resources/mp4subtitles.js"></script>
+<script>
+class ButtonArea {
+	constructor() {
+		this.buttonArea = document.getElementById("buttonArea");
+		this.scriptsArea = document.getElementById("scriptsArea");
+		this.file;
+	}
+}
+
+let B = new ButtonArea();
+
+document.querySelector('input[type="file"]').onchange = function(e) {
+	B.file = this.files[0];
+	if (B.file == null) return;
+	mp4subtitles.load(B.file, readyCallback);
+	while(B.buttonArea.firstChild) {
+		B.buttonArea.removeChild(B.buttonArea.lastChild);
+	}
+	B.scriptsArea.value = "";
+}
+
+function readyCallback() {
+	let languages = mp4subtitles.getAvailableLanguage();
+	for (let fn of languages) {
+		let btn = document.createElement("input");
+		btn.type = "button";
+		btn.value = fn;
+		btn.onclick = () => {
+			writeButtonClicked(fn);
+		};
+		B.buttonArea.appendChild(btn);
+	}
+}
+
+function writeButtonClicked(languageName) {
+	let scriptsArray = mp4subtitles.getScriptsArray(languageName, showInSRT);
+}
+
+function showInSRT(scriptsArray) {
+	let sheet = "";
+	let no = 1;
+	for(let s of scriptsArray) {
+		sheet += no + "\n" + getTime(s[0], ",") + " --> " + getTime(s[1], ",") + "\n" + s[2] + "\n\n";
+		no++;
+	}
+	B.scriptsArea.value = sheet;
+	saveScript(sheet);
+}
+
+function getTime(currentTime, delim) {
+    let ct = Math.floor(currentTime / 1000);
+    let hour = Math.floor(ct / 3600000);
+    let minute = Math.floor(ct % 3600000 / 60000);
+    let sec = Math.floor(ct % 60000 / 1000);
+    let csec = Math.floor(ct % 1000);
+    return ("00" + hour).slice(-2) + ":" + ("00" + minute).slice(-2) + ":" + ("00" + sec).slice(-2) + delim + ("000" + csec).slice(-3);
+}
+
+function saveScript(text) {
+	let bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+	let blob = new Blob([ bom,  text ], { "type" : "text/plain" });
+	const a = document.createElement("a");
+	a.href = window.URL.createObjectURL(blob);
+	a.download = B.file.name + "-script.srt";
+	a.click();
+}
+
+
+</script>

@@ -1,0 +1,82 @@
+<html>
+	<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Sonic Screw-Pliers</title>
+        <link rel="shortcut icon" href="./CyanKiwiBird.png">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="stylesheet" href="./resources/vplayer.css">
+	</head>
+	<body>
+		<header id="headerSection">
+			<div class="fileSection">
+				<label for="mediaFile" class="fileInput">
+					Open Sound/Script file
+				</label>
+				<input type="file" id="mediaFile" accept=".mp3,.webm,.mp4,.mkv,.wav,.txt,.srt" />
+				<div id="filename">Powered by MP4Box.js</div>
+			</div>
+
+			<figure id="videoContainer" data-fullscreen="false">
+				<video id="videoElement" preload="metadata" poster="./resources/vplayer.svg" playsinline>
+					<source src="">
+				</video>
+				<div id="video-controls" class="controls" data-state="visible">
+					<div class="progress">
+						<progress id="progress" value="0" min="0" max="">
+							<span id="progress-bar"></span>
+						</progress>
+					</div>
+				</div>
+				<figcaption>
+					<div id="playControls">
+						<input type="button" id="pressPlay" class="noMovingButton" disabled value="Press Play"></input>
+						<input type="button" id="playPause" class="noMovingButton" disabled value="Push to Play/Pause"></input>
+						<span style="float:right">
+							<select id="selector" onchange="speedChange(this);">
+								<option value="0.2">×0.2</option>
+								<option value="0.4">×0.4</option>
+								<option value="0.6">×0.6</option>
+								<option value="0.8">×0.8</option>
+								<option value="1.0" selected>×1.0</option>
+								<option value="1.2">×1.2</option>
+								<option value="1.4">×1.4</option>
+								<option value="1.6">×1.6</option>
+								<option value="1.8">×1.8</option>
+								<option value="2.0">×2.0</option>
+								<option value="2.2">×2.2</option>
+								<option value="2.4">×2.4</option>
+								<option value="2.6">×2.6</option>
+								<option value="2.8">×2.8</option>
+								<option value="3.0">×3.0</option>
+							</select>
+						</span>
+					</div>
+					<div id="quickRewind">
+						<input type="button" class="buttons rew" value="<<10" onclick="rewind(10);"></input>
+						<input type="button" class="buttons rew" value="<<5" onclick="rewind(5);"></input>
+						<input type="button" class="buttons rew" value="<<1" onclick="rewind(1);"></input>
+						●
+						<input type="button" class="buttons rew" value="1>>" onclick="rewind(-1);"></input>
+						<input type="button" class="buttons rew" value="5>>" onclick="rewind(-5);"></input>
+						<input type="button" class="buttons rew" value="10>>" onclick="rewind(-10);"></input>
+					</div>
+					<div id="markDiv">
+						<input type="button" id="mandl" class="buttons" value="mark & log" onclick="markAndLog();"></input>
+						<input type="button" id="monly" class="buttons" value="mark" onclick="mark();"></input>
+						<span style="float:right">
+							<input type="button" id="saveFile" class="buttons" value="Save Script" onclick="saveScript();"></input>
+						</span>
+					</div>
+				</figcaption>
+			</figure>
+		</header>
+		<div id="scriptDiv">
+			<textarea id="textArea"></textarea>
+		</div>
+
+		<script src="./resources/mp4box.all.min.js"></script>
+		<script src="./resources/ISO639.js"></script>
+		<script src="./resources/mp4subtitles.js"></script>
+		<script src="./resources/vplayer.js"></script>
+
+	</body>
+</html>
