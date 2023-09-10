@@ -3,6 +3,7 @@ class GlobalManager {
 		this.headerSection = document.getElementById("headerSection");
 		this.mediaFile = document.getElementById("mediaFile");
 		this.filename = document.getElementById("filename");
+		this.videoContainer = document.getElementById("videoContainer");
 		this.videoElement = document.getElementById("videoElement");
 		this.pressPlay = document.getElementById("pressPlay");
 		this.isPressHold = false;
@@ -12,11 +13,13 @@ class GlobalManager {
 		this.videoControls = document.getElementById('video-controls');
 		this.progress = document.getElementById('progress');
 		this.progressBar = document.getElementById('progress-bar');
-
+		this.frameWidth = "100%";
 	}
 }
 
 let G = new GlobalManager();
+
+initParameters();
 
 G.videoElement.controls = false;
 G.videoControls.setAttribute('data-state', 'visible');
@@ -243,6 +246,7 @@ function speedChange(obj) {
 }
 
 function resize() {
+	G.videoContainer.style = "width: " + G.frameWidth;
 	G.textArea.style = "height: " + (window.innerHeight - 
 		G.headerSection.getBoundingClientRect().height - 5) + "px;";
 }
@@ -269,6 +273,29 @@ function srt2internalExp(text) {
 		result += savedTime + savedLine + "\n";
 	}
 	return result;
+}
+
+// Parameter initialisation
+function initParameters() {
+	let urlParm = location.search.substring(1);
+	if (urlParm != "") {
+		let args = urlParm.split("&");
+		for(let i = 0; i < args.length; i++) {
+			_checkAndModify(0, args[i]);
+		}
+	}
+}
+function _checkAndModify(dest, parm) {
+	let parmPair = parm.split("=");
+	if (typeof parmPair[1] !== "undefined") {
+		if (parmPair[0] == "w") {
+			G.frameWidth = parmPair[1] + "%";
+		} else {
+			console.log("Parameter name not found: " + parm);
+		}
+	} else {
+		console.log("Parameter format error: " + parm);
+	}
 }
 
 
