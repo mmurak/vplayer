@@ -14,6 +14,11 @@ class GlobalManager {
 		this.progress = document.getElementById('progress');
 		this.progressBar = document.getElementById('progress-bar');
 		this.frameWidth = "100%";
+		this.interactiveArray = [];
+		this.tracePtr = 0;
+		this.baseColor = "floralwhite";
+		this.emphasisColor = "pink";
+		this.displayOffset = 2;
 	}
 }
 
@@ -43,14 +48,14 @@ G.mediaFile.addEventListener("change", (evt) => {
 			let reader = new FileReader();
 			reader.readAsText(file);
 			reader.onload = function () {
-				G.textArea.value = reader.result;
+				G.textArea.innerHTML = convertTxtScript(reader.result);
 			}
 			break;
 		case "srt" :
 			let srtReader = new FileReader();
 			srtReader.readAsText(file);
 			srtReader.onload = function () {
-				G.textArea.value = srt2internalExp(srtReader.result);
+				G.textArea.innerHTML = srt2internalExp(srtReader.result);
 			}
 			break;
 		default:
@@ -86,15 +91,19 @@ G.pressPlay.addEventListener("touchend", (evt) => {
 	G.videoElement.pause();
 	evt.preventDefault();
 });
+
 G.textArea.addEventListener("click", (evt) =>{
 	register();
 	evt.preventDefault();
 });
+
 G.videoElement.addEventListener('loadedmetadata', function() {
 	G.progress.setAttribute('max', G.videoElement.duration);
 });
 G.videoElement.addEventListener('play', function() {
 	//	changeButtonState('playpause');
+	G.tracePtr = findLine();
+	clearAllLines();
 	if (!G.isPressHold) {
 		G.playPause.style = "background: red";
 		G.playPause.value = "Tap for\nPause";
@@ -110,8 +119,10 @@ G.playPause.addEventListener('click', function(e) {
 		G.videoElement.pause();
 	}
 });
+
 G.textArea.addEventListener("touchstart", (evt) =>{
 	register();
+//	evt.preventDefault();
 });
 G.videoElement.addEventListener('timeupdate', function() {
 	// For mobile browsers, ensure that the progress element's max attribute is set
@@ -120,6 +131,7 @@ G.videoElement.addEventListener('timeupdate', function() {
 	}
 	G.progress.value = G.videoElement.currentTime;
 	G.progressBar.style.width = Math.floor((G.videoElement.currentTime / G.videoElement.duration) * 100) + '%';
+	interactiveSubtitles();
 });
 // React to the user clicking within the progress bar
 G.progress.addEventListener('click', function(e) {
@@ -149,7 +161,7 @@ function scriptsReady(scriptsArray) {
 		sheet += no + "\n" + getSRTTime(s[0], ",") + " --> " + getSRTTime(s[1], ",") + "\n" + s[2] + "\n\n";
 		no++;
 	}
-	G.textArea.value = srt2internalExp(sheet);
+	G.textArea.innerHTML = srt2internalExp(sheet);
 }
 
 function getSRTTime(currentTime) {
@@ -162,8 +174,8 @@ function getSRTTime(currentTime) {
 }
 
 function register() {
-	let dat = G.textArea.value;
-	let pt = G.textArea.selectionStart;
+	let dat = G.textArea.textContent;
+	let pt = getCaretCharacterOffsetWithin(G.textArea);
 
 	let leftValue = dat.substring(0, pt);
 	let rightValue = dat.substring(pt);
@@ -174,20 +186,25 @@ function register() {
 	}
 	let c = rightValue.indexOf("]]");
 	let timeValue = leftValue.substring(a+2) + rightValue.substring(0, c);
-	G.textArea.selectionStart = pt + c + 2;
 	G.videoElement.currentTime = stringTimeToSec(timeValue);
 	mark();
+	//////////
+	let selectedText = window.getSelection();
+	let selectedRange = document.createRange();
+	selectedRange.setStart(selectedText.focusNode, 16);
+	selectedRange.setEnd(selectedText.focusNode, 16);
+	selectedRange.collapse(true);
+	selectedText.removeAllRanges();
+	selectedText.addRange(selectedRange);
+	G.textArea.focus();
+	//////////
 }
 
 function markAndLog() {
 	mark();
-	let saveIt = G.textArea.selectionStart;
-	let stampVal = "[[" + getTime(G.startPoint) + "]]";
-	G.textArea.value = G.textArea.value.substring(0, saveIt) + stampVal + 
-		G.textArea.value.substring(G.textArea.selectionEnd);
-	saveIt += stampVal.length;
-	G.textArea.setSelectionRange(saveIt, saveIt);
-	G.textArea.focus();	// to make chrome happy.
+	let stampVal = "<span class='B'>[[" + getTime(G.startPoint) + "]]</span>";
+	G.textArea.focus();
+	pasteHtmlAtCaret(stampVal);
 }
 
 function mark() {
@@ -248,22 +265,55 @@ function speedChange(obj) {
 function resize() {
 	G.videoContainer.style = "width: " + G.frameWidth;
 	G.textArea.style = "height: " + (window.innerHeight - 
-		G.headerSection.getBoundingClientRect().height - 5) + "px;";
+		G.headerSection.getBoundingClientRect().height - 15) + "px;";
 }
+
+function convertTxtScript(text) {
+	G.interactiveArray = [];
+	let clusters = text.split(/\n/);
+	let result = "";
+	G.lineNo = 1;
+	for (line of clusters) {
+		let blueMatch = line.match(/^\[\[(\d\d:\d\d:\d\d\.\d\d\d)\]\](.*)$/);
+		if (blueMatch != null) {
+			let blueTime = '<a name="' + G.lineNo + '" id="L' + G.lineNo + '" class="A">[[' + blueMatch[1] + ']]</a>';
+			let rest = convertGreenMarker(blueMatch[2]);
+			result += blueTime + rest + "<br/>\n";
+			G.interactiveArray.push(stringTimeToSec(blueMatch[1]) - 0.1);		// 0.1 for lag
+			G.lineNo++;
+		} else {
+			result += convertGreenMarker(line) + "<br/>\n";
+		}
+	}
+	return result;
+}
+
+function convertGreenMarker(line) {
+	let nl = line.replaceAll('[[', '<span class="B">[[');
+	return nl.replaceAll(']]', ']]</span>');
+}
+
 
 function srt2internalExp(text) {
 	let clusters = text.split(/\n\n/);
 	let result = "";
 	let savedLine = "";
 	let savedTime = "";
+	let internalTime = 0;
+	G.lineNo = 1;
+	G.interactiveArray = [];
 	for (let i = 0; i < clusters.length; i++) {
 		let m = clusters[i].match(/^(\d+)\n(\d\d:\d\d:\d\d,\d\d\d) --> \d\d:\d\d:\d\d,\d\d\d\n((.|\n|\r\n)*)$/);
 		if (m != null) {
-			savedTime = (savedTime == "") ? "[[" + m[2].replace(",", ".") + "]]" : savedTime;
+			if (savedTime == "") {
+				savedTime =  m[2].replace(",", ".");
+			}
 			let val = m[3].trim().replaceAll(/(\n|\r\n)/g, " ");
 			savedLine += " " + val;
 			if ((val.slice(-1) == ".") || (val.slice(-1) == "!") || (val.slice(-1) == "?") || (val.slice(-1) == ")")) {
-				result += savedTime + savedLine + "\n";
+				result += "<a name='" + G.lineNo + "' id='L" + G.lineNo + "' class='A'>[[" + savedTime  + "]]</a>" + savedLine + "<br/>\n";
+				G.lineNo++;
+				G.interactiveArray.push(stringTimeToSec(savedTime) - 0.1);	// 0.1 for lag
 				savedTime = "";
 				savedLine = "";
 			}
@@ -298,11 +348,104 @@ function _checkAndModify(dest, parm) {
 	}
 }
 
+// from Stackoverflow https://stackoverflow.com/questions/4767848/get-caret-cursor-position-in-contenteditable-area-containing-html-content
+function getCaretCharacterOffsetWithin(element) {
+	let caretOffset = 0;
+	let doc = element.ownerDocument || element.document;
+	let win = doc.defaultView || doc.parentWindow;
+	let sel;
+	if (typeof win.getSelection != "undefined") {
+		sel = win.getSelection();
+		if (sel.rangeCount > 0) {
+			let range = win.getSelection().getRangeAt(0);
+			let preCaretRange = range.cloneRange();
+			preCaretRange.selectNodeContents(element);
+			preCaretRange.setEnd(range.endContainer, range.endOffset);
+			caretOffset = preCaretRange.toString().length;
+		}
+	} else if ( (sel = doc.selection) && sel.type != "Control") {
+		let textRange = sel.createRange();
+		let preCaretTextRange = doc.body.createTextRange();
+		preCaretTextRange.moveToElementText(element);
+		preCaretTextRange.setEndPoint("EndToEnd", textRange);
+		caretOffset = preCaretTextRange.text.length;
+	}
+	return caretOffset;
+}
+
+// Code from https://jsfiddle.net/Xeoncross/4tUDk/
+function pasteHtmlAtCaret(html) {
+    var sel, range;
+    if (window.getSelection) {
+        // IE9 and non-IE
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+
+            // Range.createContextualFragment() would be useful here but is
+            // non-standard and not supported in all browsers (IE9, for one)
+            var el = document.createElement("div");
+            el.innerHTML = html;
+            var frag = document.createDocumentFragment(), node, lastNode;
+            while ( (node = el.firstChild) ) {
+                lastNode = frag.appendChild(node);
+            }
+            range.insertNode(frag);
+            
+            // Preserve the selection
+            if (lastNode) {
+                range = range.cloneRange();
+                range.setStartAfter(lastNode);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
+    } else if (document.selection && document.selection.type != "Control") {
+        // IE < 9
+        document.selection.createRange().pasteHTML(html);
+    }
+}
+
+function interactiveSubtitles() {
+	let ptr = findLine() + 1;
+	if (ptr != G.tracePtr) {
+		setBackgroundColor(G.tracePtr, G.baseColor);
+	}
+	if (ptr < G.interactiveArray.length + 1) {
+		setBackgroundColor(ptr, G.emphasisColor);
+		G.tracePtr = ptr;
+	}
+	let offset = (ptr > G.displayOffset) ? ptr - G.displayOffset : 1;
+	window.location.hash = offset;
+//	G.textArea.focus();		// if you activate this line, you'll suffer some toggling problems,
+// because the caret of this contenteditable div remains at somewhere.
+}
+
+function setBackgroundColor(at, color) {
+	if (at < 1) return;
+	document.getElementById("L" + at).style = "background-color:" + color;
+}
+
+function clearAllLines() {
+	for (let i = 1; i < G.lineNo; i++) {
+		setBackgroundColor(i, G.baseColor);
+	}
+}
+
+function findLine() {
+	let i = G.interactiveArray.length - 1;
+	while((i >= 0) && (G.videoElement.currentTime < G.interactiveArray[i])) {
+		i--;
+	}
+	return i;
+}
 
 // File Writer
 function saveScript() {
 	let bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-	let blob = new Blob([ bom,  G.textArea.value ], { "type" : "text/plain" });
+	let blob = new Blob([ bom,  G.textArea.innerText ], { "type" : "text/plain" });
 	const a = document.createElement("a");
 	a.href = window.URL.createObjectURL(blob);
 	a.download = "script.txt";
