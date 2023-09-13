@@ -346,6 +346,9 @@ function _checkAndModify(dest, parm) {
 			case "c" :
 				G.logColor = parmPair[1];
 				break;
+			case "d" :
+				G.displayOffset = parmPair[1];
+				break;
 			default:
 				console.log("Parameter name not found: " + parm);
 		}
