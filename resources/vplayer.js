@@ -19,6 +19,7 @@ class GlobalManager {
 		this.baseColor = "floralwhite";
 		this.emphasisColor = "pink";
 		this.displayOffset = 2;
+		this.logColor = "red";
 	}
 }
 
@@ -202,7 +203,7 @@ function register() {
 
 function markAndLog() {
 	mark();
-	let stampVal = "<span class='B'>[[" + getTime(G.startPoint) + "]]</span>";
+	let stampVal = '<span style="color:' + G.logColor + '">[[' + getTime(G.startPoint) + ']]</span>';
 	G.textArea.focus();
 	pasteHtmlAtCaret(stampVal);
 }
@@ -289,7 +290,7 @@ function convertTxtScript(text) {
 }
 
 function convertGreenMarker(line) {
-	let nl = line.replaceAll('[[', '<span class="B">[[');
+	let nl = line.replaceAll('[[', '<span style="color:' + G.logColor + '">[[');
 	return nl.replaceAll(']]', ']]</span>');
 }
 
@@ -338,13 +339,26 @@ function initParameters() {
 function _checkAndModify(dest, parm) {
 	let parmPair = parm.split("=");
 	if (typeof parmPair[1] !== "undefined") {
-		if (parmPair[0] == "w") {
-			G.frameWidth = parmPair[1] + "%";
-		} else {
-			console.log("Parameter name not found: " + parm);
+		switch (parmPair[0]) {
+			case "w":
+				G.frameWidth = parmPair[1] + "%";
+				break;
+			case "c" :
+				G.logColor = parmPair[1];
+				break;
+			default:
+				console.log("Parameter name not found: " + parm);
 		}
 	} else {
 		console.log("Parameter format error: " + parm);
+	}
+}
+
+function changeFrameSize() {
+	let a = prompt("Enter the frame ratio in %.", G.frameWidth.replace("%", ""));
+	if (Number(a)) {
+		G.frameWidth = a + "%";
+		resize();
 	}
 }
 
