@@ -8,6 +8,7 @@ class GlobalManager {
 		this.pressPlay = document.getElementById("pressPlay");
 		this.isPressHold = false;
 		this.playPause = document.getElementById("playPause");
+		this.selector = document.getElementById("selector");
 		this.textArea = document.getElementById("textArea");
 		this.startPoint = 0.0;
 		this.videoControls = document.getElementById('video-controls');
@@ -20,6 +21,7 @@ class GlobalManager {
 		this.emphasisColor = "pink";
 		this.displayOffset = 2;
 		this.logColor = "red";
+		this.analyse = true;
 	}
 }
 
@@ -60,7 +62,9 @@ G.mediaFile.addEventListener("change", (evt) => {
 			}
 			break;
 		default:
-			mp4subtitles.load(file, readyCallback);
+			if (G.analyse) {
+				mp4subtitles.load(file, readyCallback);
+			}
 			G.videoElement.src = window.URL.createObjectURL(file);
 			G.startPoint = 0.0;
 			resize();
@@ -108,9 +112,11 @@ G.videoElement.addEventListener('play', function() {
 	if (!G.isPressHold) {
 		G.playPause.style = "background: red";
 		G.playPause.value = "Tap for\nPause";
+		G.selector.disabled = true;
 	}
 }, false);
 G.videoElement.addEventListener('pause', function() {
+	G.selector.disabled = false;
 	setPlayPause();
 }, false);
 G.playPause.addEventListener('click', function(e) {
@@ -349,6 +355,13 @@ function _checkAndModify(dest, parm) {
 				break;
 			case "d" :
 				G.displayOffset = parmPair[1];
+				break;
+			case "a" :
+				if (parmPair[1] == "no") {
+					G.analyse = false;
+				} else {
+					G.analyse = true;
+				}
 				break;
 			default:
 				console.log("Parameter name not found: " + parm);
