@@ -197,7 +197,8 @@ function register() {
 	selectedRange.collapse(true);
 	selectedText.removeAllRanges();
 	selectedText.addRange(selectedRange);
-	G.textArea.focus();
+	G.textArea.blur();
+	interactiveSubtitles();
 	//////////
 }
 
@@ -436,6 +437,7 @@ function interactiveSubtitles() {
 	}
 	let offset = (ptr > G.displayOffset) ? ptr - G.displayOffset : 1;
 	window.location.hash = offset;
+	G.playPause.focus();
 //	G.textArea.focus();		// if you activate this line, you'll suffer some toggling problems,
 // because the caret of this contenteditable div remains at somewhere.
 }
