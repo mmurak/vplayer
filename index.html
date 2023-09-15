@@ -17,9 +17,17 @@
 			</div>
 
 			<figure id="videoContainer" data-fullscreen="false">
-				<video id="videoElement" preload="metadata" poster="./resources/vplayer.svg" playsinline>
-					<source src="">
-				</video>
+				<div style="display: flex">
+					<video id="videoElement" preload="metadata" poster="./resources/vplayer.svg" playsinline>
+						<source src="">
+					</video>
+					<input id="selector" max="2.0" min="0.2" step="0.2" value="1.0"  type="range" list="speedList" orient="vertical"></input>
+					<datalist id="speedList" >
+						<option value="0.2"></option>
+						<option value="1.0"></option>
+						<option value="2.0"></option>
+					</datalist>
+				</div>
 				<div id="video-controls" class="controls" data-state="visible">
 					<div class="progress">
 						<progress id="progress" value="0" min="0" max="">
@@ -31,25 +39,7 @@
 					<div id="playControls">
 						<input type="button" id="pressPlay" class="noMovingButton" disabled value="Press Play"></input>
 						<input type="button" id="playPause" class="noMovingButton" disabled value="Push to Play/Pause"></input>
-						<span style="float:right">
-							<select id="selector" onchange="speedChange(this);">
-								<option value="0.2">×0.2</option>
-								<option value="0.4">×0.4</option>
-								<option value="0.6">×0.6</option>
-								<option value="0.8">×0.8</option>
-								<option value="1.0" selected>×1.0</option>
-								<option value="1.2">×1.2</option>
-								<option value="1.4">×1.4</option>
-								<option value="1.6">×1.6</option>
-								<option value="1.8">×1.8</option>
-								<option value="2.0">×2.0</option>
-								<option value="2.2">×2.2</option>
-								<option value="2.4">×2.4</option>
-								<option value="2.6">×2.6</option>
-								<option value="2.8">×2.8</option>
-								<option value="3.0">×3.0</option>
-							</select>
-						</span>
+						<span id="speedMeter" style="float:right">☓1.0</span>
 					</div>
 					<div id="quickRewind">
 						<input type="button" class="buttons rew" value="<<10" onclick="rewind(10);"></input>

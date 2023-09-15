@@ -9,12 +9,13 @@ class GlobalManager {
 		this.isPressHold = false;
 		this.playPause = document.getElementById("playPause");
 		this.selector = document.getElementById("selector");
+		this.speedMeter = document.getElementById("speedMeter");
 		this.textArea = document.getElementById("textArea");
 		this.startPoint = 0.0;
 		this.videoControls = document.getElementById('video-controls');
 		this.progress = document.getElementById('progress');
 		this.progressBar = document.getElementById('progress-bar');
-		this.frameWidth = "100%";
+		this.frameWidth = "100";
 		this.interactiveArray = [];
 		this.tracePtr = 0;
 		this.baseColor = "floralwhite";
@@ -28,6 +29,7 @@ class GlobalManager {
 let G = new GlobalManager();
 
 initParameters();
+resize();
 
 G.videoElement.controls = false;
 G.videoControls.setAttribute('data-state', 'visible');
@@ -112,11 +114,9 @@ G.videoElement.addEventListener('play', function() {
 	if (!G.isPressHold) {
 		G.playPause.style = "background: red";
 		G.playPause.value = "Tap for\nPause";
-		G.selector.disabled = true;
 	}
 }, false);
 G.videoElement.addEventListener('pause', function() {
-	G.selector.disabled = false;
 	setPlayPause();
 }, false);
 G.playPause.addEventListener('click', function(e) {
@@ -153,6 +153,9 @@ document.addEventListener("dblclick", (e) => {
     e.preventDefault();
 });
 
+G.selector.addEventListener("change", function(e) {
+	speedChange(G.selector);
+});
 
 function readyCallback() {
 	let langList = mp4subtitles.getAvailableLanguage();
@@ -267,11 +270,14 @@ function rewind(sec) {
 
 // Called when speed-slider is changed.
 function speedChange(obj) {
-	G.videoElement.playbackRate =obj.value;
+	let speed = obj.value;
+	G.videoElement.playbackRate =speed;
+	speed = (speed.length == 1) ? speed + ".0" : speed;
+	G.speedMeter.innerHTML = "☓" + speed;
 }
 
 function resize() {
-	G.videoContainer.style = "width: " + G.frameWidth;
+	G.videoContainer.style = "width: " + Math.floor(G.frameWidth * 0.9) + "%";
 	G.textArea.style = "height: " + (window.innerHeight - 
 		G.headerSection.getBoundingClientRect().height - 15) + "px;";
 }
@@ -348,7 +354,7 @@ function _checkAndModify(dest, parm) {
 	if (typeof parmPair[1] !== "undefined") {
 		switch (parmPair[0]) {
 			case "w":
-				G.frameWidth = parmPair[1] + "%";
+				G.frameWidth = parmPair[1];
 				break;
 			case "c" :
 				G.logColor = parmPair[1];
@@ -372,9 +378,9 @@ function _checkAndModify(dest, parm) {
 }
 
 function changeFrameSize() {
-	let a = prompt("Enter the frame ratio in %.", G.frameWidth.replace("%", ""));
+	let a = prompt("Enter the frame ratio in %.", G.frameWidth);
 	if (Number(a)) {
-		G.frameWidth = a + "%";
+		G.frameWidth = a;
 		resize();
 	}
 }

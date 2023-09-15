@@ -199,3 +199,12 @@ video {
 .A{
 	color: blue;
 }
+
+#selector{
+	-webkit-appearance: none;
+	-webkit-appearance: slider-vertical;
+	color: white;
+	cursor: pointer;
+	width: 20px;
+	align-right: auto;
+}
